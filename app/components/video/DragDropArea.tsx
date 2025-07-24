@@ -6,7 +6,7 @@ interface DragDropAreaProps {
   uploadError: string | null;
   transcriptionSuccess: boolean;
   transcriptionError: string | null;
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File) => void | Promise<void>;
   children: (props: { openFileDialog: () => void }) => React.ReactNode;
 }
 
@@ -32,7 +32,7 @@ export function DragDropArea({
     }
   }
 
-  function handleDrop(e: React.DragEvent) {
+  async function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -41,19 +41,19 @@ export function DragDropArea({
     if (files && files.length > 0) {
       const file = files[0];
       if (file.type === 'video/mp4') {
-        onFileSelect(file);
+        await onFileSelect(file);
       } else {
         alert('Please select an MP4 file.');
       }
     }
   }
 
-  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
       if (file.type === 'video/mp4') {
-        onFileSelect(file);
+        await onFileSelect(file);
       } else {
         alert('Please select an MP4 file.');
       }

@@ -8,6 +8,13 @@
       "when": 1752765762804,
       "tag": "0000_jittery_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1753375407025,
+      "tag": "0001_last_baron_strucker",
+      "breakpoints": true
     }
   ]
 }

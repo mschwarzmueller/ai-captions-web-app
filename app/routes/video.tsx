@@ -7,7 +7,11 @@ import type { Route } from './+types/video';
 import { auth } from '~/lib/auth';
 import { userContext } from '~/context';
 import { getUploadPresignedUrl, uploadFileWithProgress } from '~/lib/upload';
-import { startTranscription, extractAndUploadTranscriptionFiles, type ExtractedFiles } from '~/lib/transcribe';
+import {
+  startTranscription,
+  extractAndUploadTranscriptionFiles,
+  type ExtractedFiles,
+} from '~/lib/transcribe';
 import {
   DragDropArea,
   EmptyState,
@@ -31,6 +35,7 @@ export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
 
 export default function VideoRoute() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -43,12 +48,38 @@ export default function VideoRoute() {
   const [transcriptionResult, setTranscriptionResult] = useState<string | null>(
     null
   );
-  const [extractedFiles, setExtractedFiles] = useState<ExtractedFiles | null>(null);
+  const [extractedFiles, setExtractedFiles] = useState<ExtractedFiles | null>(
+    null
+  );
   const [extractingFiles, setExtractingFiles] = useState(false);
 
-  function handleFileSelect(file: File) {
+  async function extractVideoDuration(file: File): Promise<number> {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        const duration = Math.round(video.duration);
+        resolve(duration);
+      };
+
+      video.onerror = () => {
+        console.warn('Could not extract video duration');
+        resolve(0);
+      };
+
+      video.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function handleFileSelect(file: File) {
     setSelectedFile(file);
     resetUploadState();
+
+    // Extract video duration
+    const duration = await extractVideoDuration(file);
+    setVideoDuration(duration);
   }
 
   function removeFile() {
@@ -57,6 +88,7 @@ export default function VideoRoute() {
   }
 
   function resetUploadState() {
+    setVideoDuration(0);
     setUploading(false);
     setUploadProgress(0);
     setUploadError(null);
@@ -69,7 +101,73 @@ export default function VideoRoute() {
     setExtractingFiles(false);
   }
 
-  async function transcribe(key: string) {
+  async function saveVideoToDatabase(
+    filename: string,
+    r2Key: string,
+    duration: number = 0
+  ): Promise<string | null> {
+    try {
+      const formData = new FormData();
+      formData.append('filename', filename);
+      formData.append('r2Key', r2Key);
+      formData.append('duration', duration.toString());
+
+      const response = await fetch('/api/upload-complete', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save video to database');
+      }
+
+      const result = await response.json();
+      console.log('Video saved to database successfully');
+      return result.videoId;
+    } catch (error) {
+      console.error('Error saving video to database:', error);
+      // Don't throw - this is a non-critical error that shouldn't break the user flow
+      return null;
+    }
+  }
+
+  async function saveArtifactsToDatabase(
+    videoId: string,
+    keys: ExtractedFiles['keys']
+  ) {
+    try {
+      const formData = new FormData();
+      formData.append('videoId', videoId);
+
+      if (keys.transcriptKey) {
+        formData.append('transcriptKey', keys.transcriptKey);
+      }
+      if (keys.wordsKey) {
+        formData.append('wordsKey', keys.wordsKey);
+      }
+      if (keys.srtKey) {
+        formData.append('srtKey', keys.srtKey);
+      }
+
+      const response = await fetch('/api/transcription-complete', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save artifacts to database');
+      }
+
+      console.log('Artifacts saved to database successfully');
+    } catch (error) {
+      console.error('Error saving artifacts to database:', error);
+      // Don't throw - this is a non-critical error that shouldn't break the user flow
+    }
+  }
+
+  async function transcribe(key: string, videoId: string) {
     setTranscribing(true);
     setTranscriptionError(null);
 
@@ -81,19 +179,27 @@ export default function VideoRoute() {
 
       setTranscriptionSuccess(true);
       setTranscriptionResult(transcribeResult.text);
-      
+
       // Extract and upload transcription files
       setExtractingFiles(true);
       try {
-        const extracted = await extractAndUploadTranscriptionFiles(transcribeResult, key);
+        const extracted = await extractAndUploadTranscriptionFiles(
+          transcribeResult,
+          key
+        );
         setExtractedFiles(extracted);
-        console.log('Successfully extracted and uploaded files:', extracted.uploadedFiles);
+        console.log(
+          'Successfully extracted and uploaded files:',
+          extracted.uploadedFiles
+        );
+
+        // Save artifacts to database
+        await saveArtifactsToDatabase(videoId, extracted.keys);
       } catch (extractError) {
         console.error('Error extracting files:', extractError);
       } finally {
         setExtractingFiles(false);
       }
-      
     } catch (error) {
       console.error('Transcription error:', error);
       setTranscriptionError(
@@ -132,8 +238,19 @@ export default function VideoRoute() {
       setUploadSuccess(true);
       console.log('File uploaded successfully:', result.uploadUrl);
 
+      // Save video to database and get the generated video ID
+      const generatedVideoId = await saveVideoToDatabase(
+        selectedFile.name,
+        result.key,
+        videoDuration
+      );
+
+      if (!generatedVideoId) {
+        throw new Error('Failed to save video to database');
+      }
+
       setUploading(false);
-      await transcribe(result.key);
+      await transcribe(result.key, generatedVideoId);
     } catch (error) {
       console.error('Upload error:', error);
       setUploading(false);
@@ -141,16 +258,18 @@ export default function VideoRoute() {
     }
   }
 
-  const showFileActions = !uploading && !transcribing && !uploadSuccess && !extractingFiles;
+  const showFileActions =
+    !uploading && !transcribing && !uploadSuccess && !extractingFiles;
   const showUploadButton =
-    selectedFile && !uploading && !uploadSuccess && !transcribing && !extractingFiles;
+    selectedFile &&
+    !uploading &&
+    !uploadSuccess &&
+    !transcribing &&
+    !extractingFiles;
 
   return (
     <>
-      <form
-        className="max-w-2xl mx-auto p-6"
-        onSubmit={handleSubmit}
-      >
+      <form className="max-w-2xl mx-auto p-6" onSubmit={handleSubmit}>
         <Card className="p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -178,7 +297,9 @@ export default function VideoRoute() {
                     uploadSuccess={uploadSuccess}
                     transcribing={transcribing || extractingFiles}
                     transcriptionError={transcriptionError}
-                    transcriptionSuccess={transcriptionSuccess && !extractingFiles}
+                    transcriptionSuccess={
+                      transcriptionSuccess && !extractingFiles
+                    }
                   />
                   <FileStatus
                     fileName={selectedFile.name}
@@ -188,7 +309,9 @@ export default function VideoRoute() {
                     uploadSuccess={uploadSuccess}
                     transcribing={transcribing || extractingFiles}
                     transcriptionError={transcriptionError}
-                    transcriptionSuccess={transcriptionSuccess && !extractingFiles}
+                    transcriptionSuccess={
+                      transcriptionSuccess && !extractingFiles
+                    }
                   />
 
                   {extractingFiles && (
@@ -253,7 +376,7 @@ export default function VideoRoute() {
             </h2>
             <p className="text-gray-600">{transcriptionResult}</p>
           </Card>
-          
+
           {extractedFiles && (
             <Card className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">

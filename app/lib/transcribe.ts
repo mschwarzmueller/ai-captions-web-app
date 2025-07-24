@@ -30,6 +30,11 @@ export interface ExtractedFiles {
     wordsUrl?: string;
     srtUrl?: string;
   };
+  keys: {
+    transcriptKey?: string;
+    wordsKey?: string;
+    srtKey?: string;
+  };
 }
 
 /**
@@ -104,6 +109,7 @@ export async function extractAndUploadTranscriptionFiles(
     }
 
     const uploadedFiles: ExtractedFiles['uploadedFiles'] = {};
+    const keys: ExtractedFiles['keys'] = {};
 
     // Upload transcript
     if (transcript) {
@@ -112,6 +118,7 @@ export async function extractAndUploadTranscriptionFiles(
       await uploadContent(transcript, transcriptUpload.presignedUrl, 'text/plain');
       const transcriptDownload = await getDownloadPresignedUrl(transcriptUpload.key);
       uploadedFiles.transcriptUrl = transcriptDownload.presignedUrl;
+      keys.transcriptKey = transcriptUpload.key;
     }
 
     // Upload words JSON
@@ -121,6 +128,7 @@ export async function extractAndUploadTranscriptionFiles(
       await uploadContent(words, wordsUpload.presignedUrl, 'application/json');
       const wordsDownload = await getDownloadPresignedUrl(wordsUpload.key);
       uploadedFiles.wordsUrl = wordsDownload.presignedUrl;
+      keys.wordsKey = wordsUpload.key;
     }
 
     // Upload SRT
@@ -130,6 +138,7 @@ export async function extractAndUploadTranscriptionFiles(
       await uploadContent(srt, srtUpload.presignedUrl, 'text/srt');
       const srtDownload = await getDownloadPresignedUrl(srtUpload.key);
       uploadedFiles.srtUrl = srtDownload.presignedUrl;
+      keys.srtKey = srtUpload.key;
     }
 
     return {
@@ -137,6 +146,7 @@ export async function extractAndUploadTranscriptionFiles(
       words,
       srt,
       uploadedFiles,
+      keys,
     };
   } catch (error) {
     console.error('Error extracting and uploading transcription files:', error);
