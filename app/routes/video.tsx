@@ -1,9 +1,25 @@
 import { useState, useRef } from 'react';
-import { useNavigate, Form, type ActionFunctionArgs } from 'react-router';
+import { redirect, useNavigate } from 'react-router';
 
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { signOut } from '~/lib/auth-client';
+import type { Route } from './+types/video';
+import { auth } from '~/lib/auth';
+import { userContext } from '~/context';
+
+export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
+  async ({ request, context }) => {
+    const authData = await auth.api.getSession(request);
+
+    const session = authData?.session;
+
+    if (!authData || !session) {
+      throw redirect('/');
+    }
+    context.set(userContext, { uid: session.userId });
+  },
+];
 
 export default function VideoRoute() {
   const navigate = useNavigate();
@@ -14,7 +30,9 @@ export default function VideoRoute() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
-  const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(
+    null
+  );
   const [transcriptionSuccess, setTranscriptionSuccess] = useState(false);
   const [fileKey, setFileKey] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +146,9 @@ export default function VideoRoute() {
       console.log('Transcription completed:', transcribeResult);
     } catch (error) {
       console.error('Transcription error:', error);
-      setTranscriptionError(error instanceof Error ? error.message : 'Transcription failed');
+      setTranscriptionError(
+        error instanceof Error ? error.message : 'Transcription failed'
+      );
     } finally {
       setTranscribing(false);
     }
@@ -323,7 +343,7 @@ export default function VideoRoute() {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                  ) : (transcriptionError || uploadError) ? (
+                  ) : transcriptionError || uploadError ? (
                     <svg
                       className="w-6 h-6 text-red-600"
                       fill="none"
@@ -382,18 +402,23 @@ export default function VideoRoute() {
                     <p className="text-sm text-red-600 mt-2">{uploadError}</p>
                   )}
                   {transcriptionError && (
-                    <p className="text-sm text-red-600 mt-2">{transcriptionError}</p>
+                    <p className="text-sm text-red-600 mt-2">
+                      {transcriptionError}
+                    </p>
                   )}
                   {transcriptionSuccess && (
                     <p className="text-sm text-green-600 mt-2">
                       Transcription completed successfully!
                     </p>
                   )}
-                  {uploadSuccess && !transcribing && !transcriptionSuccess && !transcriptionError && (
-                    <p className="text-sm text-green-600 mt-2">
-                      Upload completed successfully!
-                    </p>
-                  )}
+                  {uploadSuccess &&
+                    !transcribing &&
+                    !transcriptionSuccess &&
+                    !transcriptionError && (
+                      <p className="text-sm text-green-600 mt-2">
+                        Upload completed successfully!
+                      </p>
+                    )}
                 </div>
                 {!uploading && !transcribing && !uploadSuccess && (
                   <div className="flex gap-3 justify-center">
