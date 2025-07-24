@@ -1,7 +1,7 @@
 {
   "language_code": "eng",
-  "language_probability": 0.9804533123970032,
-  "text": "So now that we got this solid foundation about building AI workflows, we're ready to finally start building AI agents and also agentic systems. Though, as I already mentioned in the previous section, you could already call some of the workflows we built there agentic systems because some people would call each step we had in there an agent, since it was a task fulfilled with help of an LLM. But we'll get back to this in this section. Because in this section here, we'll explore in depth how to build agents. And with that, I also mean fully autonomous agents. Therefore, we'll take a look at how large language models do and do not use tools, so how we can build agents by exposing tools to large language models. We'll explore how we can build pretty generic universal agents and how we can build more specialized agents and which approach might be better in certain situations. We'll learn how we can connect multiple agents and build an agentic system, and we'll also dive into memory management. And with that, I don't mean the memory of your computer, but instead short and long-term memory that can be made available to agents to make sure, uh, that they're able to remember things. Again, plenty of things to cover. Let's dive in.",
+  "language_probability": 0.965410590171814,
+  "text": "So now that we got this solid foundation about building AI workflows, we're ready to finally start building AI agents and also agentic systems. Though, as I already mentioned in the previous section, you could already call some of the workflows we built there agentic systems because some people would call each step we had in there an agent, since it was a task fulfilled with help of an LLM. But we'll get back to this in this section. Because in this section here, we'll explore in depth how to build agents. And with that, I also mean fully autonomous agents. Therefore, we'll take a look at how large language models do and do not use tools, so how we can build agents by exposing tools to large language models. We'll explore how we can build pretty generic universal agents and how we can build more specialized agents, and which approach might be better in certain situations. We'll learn how we can connect multiple agents and build an agentic system, and we'll also dive into memory management. And with that, I don't mean the memory of your computer but instead short and long-term memory that can be made available to agents to make sure, uh, that they're able to remember things. Again, plenty of things to cover. Let's dive in.",
   "words": [
     {
       "text": "So",
@@ -2356,24 +2356,24 @@
       "logprob": 0
     },
     {
-      "text": "agents",
+      "text": "agents,",
       "start": 62.699,
-      "end": 63.06,
+      "end": 63.099,
       "type": "word",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": " ",
-      "start": 63.06,
-      "end": 63.079,
+      "start": 63.099,
+      "end": 63.099,
       "type": "spacing",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": "and",
-      "start": 63.079,
+      "start": 63.099,
       "end": 63.239,
       "type": "word",
       "speaker_id": "speaker_0",
@@ -2390,14 +2390,14 @@
     {
       "text": "which",
       "start": 63.299,
-      "end": 63.619,
+      "end": 63.579,
       "type": "word",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": " ",
-      "start": 63.619,
+      "start": 63.579,
       "end": 63.639,
       "type": "spacing",
       "speaker_id": "speaker_0",
@@ -2406,14 +2406,14 @@
     {
       "text": "approach",
       "start": 63.639,
-      "end": 64.299,
+      "end": 64.239,
       "type": "word",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": " ",
-      "start": 64.299,
+      "start": 64.239,
       "end": 64.54,
       "type": "spacing",
       "speaker_id": "speaker_0",
@@ -2678,14 +2678,14 @@
     {
       "text": "an",
       "start": 72.439,
-      "end": 72.559,
+      "end": 72.519,
       "type": "word",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": " ",
-      "start": 72.559,
+      "start": 72.519,
       "end": 72.58,
       "type": "spacing",
       "speaker_id": "speaker_0",
@@ -2996,16 +2996,16 @@
       "logprob": 0
     },
     {
-      "text": "computer,",
+      "text": "computer",
       "start": 80.379,
-      "end": 81.019,
+      "end": 81.359,
       "type": "word",
       "speaker_id": "speaker_0",
       "logprob": 0
     },
     {
       "text": " ",
-      "start": 81.019,
+      "start": 81.359,
       "end": 81.419,
       "type": "spacing",
       "speaker_id": "speaker_0",
@@ -3522,7 +3522,7 @@
       "file_extension": "srt",
       "content_type": "text/srt",
       "is_base64_encoded": false,
-      "content": "1\n00:00:00,539 --> 00:00:05,299\nSo now that we got this solid foundation about\nbuilding AI\n\n2\n00:00:05,500 --> 00:00:10,340\nworkflows, we're ready to finally start building\nAI agents and\n\n3\n00:00:10,340 --> 00:00:15,239\nalso agentic systems. Though, as I already\nmentioned in the previous\n\n4\n00:00:15,259 --> 00:00:19,739\nsection, you could already call some of the\nworkflows we built there\n\n5\n00:00:19,920 --> 00:00:24,860\nagentic systems because some people would call\neach step we had in\n\n6\n00:00:24,899 --> 00:00:29,679\nthere an agent, since it was a task fulfilled with\nhelp of an LLM.\n\n7\n00:00:29,859 --> 00:00:32,159\nBut we'll get back to this in this section.\n\n8\n00:00:32,819 --> 00:00:37,180\nBecause in this section here, we'll explore in\ndepth\n\n9\n00:00:37,479 --> 00:00:42,379\nhow to build agents. And with that, I also mean\nfully autonomous\n\n10\n00:00:42,680 --> 00:00:47,439\nagents. Therefore, we'll take a look at how large\nlanguage models\n\n11\n00:00:47,579 --> 00:00:52,079\ndo and do not use tools, so how we can build\nagents by\n\n12\n00:00:52,119 --> 00:00:55,020\nexposing tools to large language models.\n\n13\n00:00:55,360 --> 00:00:59,879\nWe'll explore how we can build pretty generic\nuniversal\n\n14\n00:00:59,959 --> 00:01:04,839\nagents and how we can build more specialized\nagents and which approach might be\n\n15\n00:01:04,919 --> 00:01:09,760\nbetter in certain situations. We'll learn how we\ncan connect\n\n16\n00:01:10,119 --> 00:01:14,939\nmultiple agents and build an agentic system, and\nwe'll\n\n17\n00:01:15,000 --> 00:01:19,899\nalso dive into memory management. And with that, I\ndon't mean the memory\n\n18\n00:01:19,919 --> 00:01:24,520\nof your computer, but instead short and long-term\nmemory\n\n19\n00:01:24,959 --> 00:01:29,720\nthat can be made available to agents to make sure,\nuh, that they're able to\n\n20\n00:01:29,739 --> 00:01:34,679\nremember things. Again, plenty of things to cover.\nLet's dive in.\n"
+      "content": "1\n00:00:00,539 --> 00:00:05,299\nSo now that we got this solid foundation about\nbuilding AI\n\n2\n00:00:05,500 --> 00:00:10,340\nworkflows, we're ready to finally start building\nAI agents and\n\n3\n00:00:10,340 --> 00:00:15,239\nalso agentic systems. Though, as I already\nmentioned in the previous\n\n4\n00:00:15,259 --> 00:00:19,739\nsection, you could already call some of the\nworkflows we built there\n\n5\n00:00:19,920 --> 00:00:24,860\nagentic systems because some people would call\neach step we had in\n\n6\n00:00:24,899 --> 00:00:29,679\nthere an agent, since it was a task fulfilled with\nhelp of an LLM.\n\n7\n00:00:29,859 --> 00:00:32,159\nBut we'll get back to this in this section.\n\n8\n00:00:32,819 --> 00:00:37,180\nBecause in this section here, we'll explore in\ndepth\n\n9\n00:00:37,479 --> 00:00:42,379\nhow to build agents. And with that, I also mean\nfully autonomous\n\n10\n00:00:42,680 --> 00:00:47,439\nagents. Therefore, we'll take a look at how large\nlanguage models\n\n11\n00:00:47,579 --> 00:00:52,079\ndo and do not use tools, so how we can build\nagents by\n\n12\n00:00:52,119 --> 00:00:55,020\nexposing tools to large language models.\n\n13\n00:00:55,360 --> 00:00:59,879\nWe'll explore how we can build pretty generic\nuniversal\n\n14\n00:00:59,959 --> 00:01:04,839\nagents and how we can build more specialized\nagents, and which approach might be\n\n15\n00:01:04,919 --> 00:01:09,760\nbetter in certain situations. We'll learn how we\ncan connect\n\n16\n00:01:10,119 --> 00:01:14,939\nmultiple agents and build an agentic system, and\nwe'll\n\n17\n00:01:15,000 --> 00:01:19,899\nalso dive into memory management. And with that, I\ndon't mean the memory\n\n18\n00:01:19,919 --> 00:01:24,520\nof your computer but instead short and long-term\nmemory\n\n19\n00:01:24,959 --> 00:01:29,720\nthat can be made available to agents to make sure,\nuh, that they're able to\n\n20\n00:01:29,739 --> 00:01:34,679\nremember things. Again, plenty of things to cover.\nLet's dive in.\n"
     }
   ]
 }

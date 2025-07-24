@@ -73,12 +73,6 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     const transcriptionResult = await response.json();
-    console.log('Transcription completed for:', fileName);
-
-    await fs.writeFile(
-      'transcription.json',
-      JSON.stringify(transcriptionResult, null, 2)
-    );
 
     return new Response(
       JSON.stringify({
