@@ -7,7 +7,7 @@ import type { Route } from './+types/video';
 import { auth } from '~/lib/auth';
 import { userContext } from '~/context';
 import { getUploadPresignedUrl, uploadFileWithProgress } from '~/lib/upload';
-import { startTranscription } from '~/lib/transcribe';
+import { startTranscription, extractAndUploadTranscriptionFiles, type ExtractedFiles } from '~/lib/transcribe';
 import {
   DragDropArea,
   EmptyState,
@@ -43,6 +43,8 @@ export default function VideoRoute() {
   const [transcriptionResult, setTranscriptionResult] = useState<string | null>(
     null
   );
+  const [extractedFiles, setExtractedFiles] = useState<ExtractedFiles | null>(null);
+  const [extractingFiles, setExtractingFiles] = useState(false);
 
   function handleFileSelect(file: File) {
     setSelectedFile(file);
@@ -63,6 +65,8 @@ export default function VideoRoute() {
     setTranscriptionError(null);
     setTranscriptionSuccess(false);
     setTranscriptionResult(null);
+    setExtractedFiles(null);
+    setExtractingFiles(false);
   }
 
   async function transcribe(key: string) {
@@ -76,7 +80,20 @@ export default function VideoRoute() {
       );
 
       setTranscriptionSuccess(true);
-      setTranscriptionResult(transcribeResult.transcription.text);
+      setTranscriptionResult(transcribeResult.text);
+      
+      // Extract and upload transcription files
+      setExtractingFiles(true);
+      try {
+        const extracted = await extractAndUploadTranscriptionFiles(transcribeResult, key);
+        setExtractedFiles(extracted);
+        console.log('Successfully extracted and uploaded files:', extracted.uploadedFiles);
+      } catch (extractError) {
+        console.error('Error extracting files:', extractError);
+      } finally {
+        setExtractingFiles(false);
+      }
+      
     } catch (error) {
       console.error('Transcription error:', error);
       setTranscriptionError(
@@ -124,9 +141,9 @@ export default function VideoRoute() {
     }
   }
 
-  const showFileActions = !uploading && !transcribing && !uploadSuccess;
+  const showFileActions = !uploading && !transcribing && !uploadSuccess && !extractingFiles;
   const showUploadButton =
-    selectedFile && !uploading && !uploadSuccess && !transcribing;
+    selectedFile && !uploading && !uploadSuccess && !transcribing && !extractingFiles;
 
   return (
     <>
@@ -159,9 +176,9 @@ export default function VideoRoute() {
                     uploading={uploading}
                     uploadError={uploadError}
                     uploadSuccess={uploadSuccess}
-                    transcribing={transcribing}
+                    transcribing={transcribing || extractingFiles}
                     transcriptionError={transcriptionError}
-                    transcriptionSuccess={transcriptionSuccess}
+                    transcriptionSuccess={transcriptionSuccess && !extractingFiles}
                   />
                   <FileStatus
                     fileName={selectedFile.name}
@@ -169,10 +186,16 @@ export default function VideoRoute() {
                     uploading={uploading}
                     uploadError={uploadError}
                     uploadSuccess={uploadSuccess}
-                    transcribing={transcribing}
+                    transcribing={transcribing || extractingFiles}
                     transcriptionError={transcriptionError}
-                    transcriptionSuccess={transcriptionSuccess}
+                    transcriptionSuccess={transcriptionSuccess && !extractingFiles}
                   />
+
+                  {extractingFiles && (
+                    <div className="text-center text-sm text-gray-600">
+                      Extracting and uploading transcription files...
+                    </div>
+                  )}
 
                   {showFileActions && (
                     <div className="flex gap-3 justify-center">
@@ -223,13 +246,62 @@ export default function VideoRoute() {
         </Card>
       </form>
       {transcriptionResult && (
-        <div className="max-w-2xl mx-auto p-6">
+        <div className="max-w-2xl mx-auto p-6 space-y-6">
           <Card className="p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Transcription
             </h2>
             <p className="text-gray-600">{transcriptionResult}</p>
           </Card>
+          
+          {extractedFiles && (
+            <Card className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Generated Files
+              </h2>
+              <div className="space-y-3">
+                {extractedFiles.uploadedFiles.transcriptUrl && (
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="font-medium">Transcript (.txt)</span>
+                    <a
+                      href={extractedFiles.uploadedFiles.transcriptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Download
+                    </a>
+                  </div>
+                )}
+                {extractedFiles.uploadedFiles.srtUrl && (
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="font-medium">SRT Captions (.srt)</span>
+                    <a
+                      href={extractedFiles.uploadedFiles.srtUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Download
+                    </a>
+                  </div>
+                )}
+                {extractedFiles.uploadedFiles.wordsUrl && (
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="font-medium">Word Timestamps (.json)</span>
+                    <a
+                      href={extractedFiles.uploadedFiles.wordsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Download
+                    </a>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
         </div>
       )}
     </>

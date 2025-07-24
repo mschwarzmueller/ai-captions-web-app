@@ -91,9 +91,18 @@ export async function action({ request }: Route.ActionArgs) {
       // Create S3 client
       const s3Client = createS3Client();
 
-      // Generate unique key for the file
-      const timestamp = Date.now();
-      const key = `videos/${timestamp}-${fileName}`;
+      // Generate key for the file
+      let key: string;
+      
+      // Check if fileName already contains a path (for generated files)
+      if (fileName.includes('/')) {
+        // Use fileName as-is if it already contains a path
+        key = fileName;
+      } else {
+        // Generate unique key for regular video uploads
+        const timestamp = Date.now();
+        key = `videos/${timestamp}-${fileName}`;
+      }
 
       console.log('Generating presigned URL for key:', key);
 
